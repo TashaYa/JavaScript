@@ -1,0 +1,139 @@
+<html>
+<body>
+
+<table border=1 width=1150>
+    <tr>
+        <td width=950>
+            <canvas id='draw' width=950 height=550 
+			onmousedown = "stopDraw(); return false;"  
+			style='border:1px solid'></canvas>
+        </td>
+        <td  width=200>
+            <form name="set" onsubmit="return false;">
+				Fill: <br> <input type="radio" id="f1" name="fill" value="0">
+				<label for="f1">yes</label><br>
+				<input type="radio" id="f2"name="fill" value="1">
+				<label for="f2">no</label><br><br>
+				Color: <br> <input type="radio" id="Choice1" name="color" value="0">
+				<label for="Choice1">green</label><br>
+				<input type="radio" id="Choice2"name="color" value="1">
+				<label for="Choice2">pink</label><br>
+				<input type="radio" id="Choice3"name="color" value="2">
+				<label for="Choice3">random</label><br><br>
+            	Radius: <br> <input type="text" name="t1" ><br>
+            	CenterX: <br> <input type="text" name="t2" ><br>
+				CenterY: <br> <input type="text" name="t3" ><br>
+				<br><input type="button" value="Start" onclick="start();"><br>
+            </form>
+        </td>
+    </tr>
+</table>
+ 
+<script type='text/javascript'>
+var canva = document.getElementById('draw');
+var ctx = canva.getContext('2d');
+ctx.strokeStyle = "rgb(170,10,170)";
+
+var dx = 13, dy = 13, centerX = 963, centerY = 563, radius = 13, newRadius = 0;
+
+ctx.beginPath();
+
+function takeCoords(){
+	canva.addEventListener('mousemove', e => {
+		drawBubble(e.clientX, e.clientY)
+	}, {once: true});
+}
+
+function drawBubble(newX, newY){
+	if (flag===1){
+		s = "#"+((1<<24)*Math.random()|0).toString(16);
+		ctx.strokeStyle = s;
+		ctx.fillStyle = s;
+	}
+	//ctx.strokeStyle = "rgba(170,10,170,"+newX/(2*canva.width)+")";
+	g = Math.sqrt(Math.pow(newX-centerX,2) + Math.pow(newY-centerY, 2))
+	if (g > radius){
+		newRadius = (g - radius) / 2;
+		if (newX > centerX){
+			centerX = centerX + ((radius+newRadius)*(newX-centerX)/g);
+		} 
+		else{
+			centerX = centerX - ((radius+newRadius)*(centerX-newX)/g);
+		}
+		if (newY > centerY){
+			centerY = centerY + ((radius+newRadius)*(newY-centerY)/g);
+		}
+		else{
+			centerY = centerY - ((radius+newRadius)*(centerY-newY)/g);
+		}
+	}
+	else{
+		newRadius = (radius - g) / 2;
+		if (newX > centerX){
+			centerX = centerX + ((radius-newRadius)*(newX-centerX)/g);
+		} 
+		else{
+			centerX = centerX - ((radius-newRadius)*(centerX-newX)/g);
+		}
+		if (newY > centerY){
+			centerY = centerY + ((radius-newRadius)*(newY-centerY)/g);
+		}
+		else{
+			centerY = centerY - ((radius-newRadius)*(centerY-newY)/g);
+		}
+	}
+	
+	ctx.arc(centerX, centerY, newRadius, 0, Math.PI*2);
+	if (document.set.fill.value === "1"){
+		ctx.stroke();
+	}
+	else{
+		ctx.stroke();
+		ctx.fill();
+	}
+	ctx.closePath();
+	ctx.beginPath();
+	radius = newRadius;
+	document.set.t1.value = radius;
+	document.set.t2.value = centerX;
+	document.set.t3.value = centerY;
+}
+
+function stopDraw(){
+	ctx.closePath();
+	clearInterval(timerT);
+	ctx.fillStyle = "white";
+	ctx.fillRect(0, 0, 950, 550);
+}
+
+let timerT = null;
+var flag = 0;
+
+function start(){
+	stopDraw();
+	flag = 0;
+	if (document.set.color.value === "0"){
+		ctx.strokeStyle = "green";
+		ctx.fillStyle = "green";
+		
+	}
+	else{
+		if (document.set.color.value === "1"){
+			ctx.strokeStyle = "rgb(170,10,170)";
+			ctx.fillStyle = "rgb(170,10,170)";
+		}
+		else{
+			flag = 1;
+		}
+	}
+	ctx.beginPath();
+	centerX = 890;
+	centerY = 510;
+	radius = 15;
+	newRadius = 0;
+	timerT = setInterval(takeCoords, 100);
+}
+
+</script>
+</body>
+</html>
